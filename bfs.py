@@ -15,7 +15,7 @@ def printState(state):
     """
     for i in range(3):
         for j in range(3):
-            print(state[i][j], end=" ")
+            print(state[i][j], end = " ")
         print()
     print()
 
@@ -136,7 +136,7 @@ def breadthFirstSearch(initial_node):
     frontier = [initial_node]
     reached = [initial_node]
     while frontier:
-        node = frontier.pop()
+        node = frontier.pop(0)  # Pop index 0 for FIFO queue
         for child in expand(node):
             state = child.state
             if state == None:
@@ -183,9 +183,10 @@ def main():
     print()
     
     initial_state = [
-        [3, 1, 2],
-        [4, 5, 8],
-        [6, 7, 0]
+
+            [2, 8, 3], 
+            [1, 6, 4], 
+            [7, 0, 5]
     ]
 
     initial_node = Node(initial_state, None, None, 0)
