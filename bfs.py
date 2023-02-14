@@ -1,4 +1,10 @@
+from collections import deque
+import numpy as np
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
+
 GOAL_STATE = [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+GOAL_STATE = np.array(GOAL_STATE)
 
 class Node:
     def __init__(self, state, parent, action, path_cost):
@@ -24,7 +30,7 @@ def isGoalState(state):
     """
     Checks if the state is the goal state.
     """
-    if GOAL_STATE == state:
+    if np.array_equal(state, GOAL_STATE):
         return True
     else:
         return False
@@ -34,7 +40,8 @@ def getIndex(state):
     """
     Returns the index (i and j) of the blank tile
     """
-    if state == None:
+    empty = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+    if np.array_equal(state, empty):
         return -1, -1
     for i in range(3):
         for j in range(3):
@@ -47,11 +54,10 @@ def moveDown(state):
     Moves a number down into the blank tile, and the blank tile moves upward.
     """
     row, col = getIndex(state)
-
+    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     if row == 0 or row == -1 and col == -1:
-        return None
+        return new_state
     else:
-        new_state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         for i in range(3):
             for j in range(3):
                 new_state[i][j] = state[i][j]
@@ -67,11 +73,10 @@ def moveUp(state):
     Moves an a number up into the blank tile, and the blank tile moves downward.
     """
     row, col = getIndex(state)
-
+    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     if row == 2 or row == -1 and col == -1:
-        return None
+        return new_state
     else:
-        new_state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         for i in range(3):
             for j in range(3):
                 new_state[i][j] = state[i][j]
@@ -87,11 +92,11 @@ def moveLeft(state):
     Moves a number left into the blank tile, and the blank tile moves right.
     """
     row, col = getIndex(state)
-
+    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     if col == 2 or row == -1 and col == -1:
-        return None
+        return new_state
     else:
-        new_state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
+        
         for i in range(3):
             for j in range(3):
                 new_state[i][j] = state[i][j]
@@ -108,10 +113,10 @@ def moveRight(state):
     """
     row, col = getIndex(state)
 
+    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     if col == 0 or row == -1 and col == -1:
-        return None
+        return new_state
     else:
-        new_state = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
         for i in range(3):
             for j in range(3):
                 new_state[i][j] = state[i][j]
@@ -131,23 +136,26 @@ def breadthFirstSearch(initial_node):
     then None is returned.
     """
     initial_state = initial_node.state
+    initial_state = np.array(initial_state)
+    empty = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     if isGoalState(initial_state):
         return initial_node, 0, 1
-    frontier = [initial_node]
-    reached = [initial_node]
+    frontier = deque([initial_node])
+    reached = np.array([initial_node])
     while frontier:
-        node = frontier.pop(0)  # Pop index 0 for FIFO queue
+        node = frontier.popleft()
         for child in expand(node):
             state = child.state
-            if state == None:
+            state = np.array(state)
+            if np.array_equal(state, empty):
                 continue
             if isGoalState(state):
                 return child, len(frontier), len(reached)
             if state not in reached:
                 frontier.append(child)
-                reached.append(child)
+                reached = np.append(reached, child)
 
-    return None
+    return empty, len(frontier), len(reached)
 
 
 def expand(node):
@@ -170,8 +178,27 @@ def expand(node):
 
     return expanded_nodes
 
+def allActions(node):
+    """
+    Either prints all the actions and states or returns the number of steps
+    """
+    actions = []
+    states = []
 
-def main():
+    while node.parent != None:
+        actions.append(node.action)
+        states.append(node.state)
+        node = node.parent
+    actions.reverse()
+    states.reverse()
+    for i in range(len(actions)):
+        print(f"Step {i+1}:")
+        print(f"Action: {actions[i]}")
+        print("\nNew State:")
+        printState(states[i])
+    print()
+
+def menu():
     print("8-Puzzle Solver")
     print("---------------")
     print("To Note: ")
@@ -181,13 +208,23 @@ def main():
     print("3. The actions are: Up, Down, Left, Right\n")
     print("4. These actions refer to a number moving into the blank tile. Not the blank tile moving in that direction.")
     print()
-    
-    initial_state = [
 
-            [2, 8, 3], 
-            [1, 6, 4], 
-            [7, 0, 5]
-    ]
+def main():
+    menu()
+
+    # Takes 10 steps
+    # initial_state = [
+    #     [2, 5, 0], 
+    #     [1, 3, 8], 
+    #     [6, 4, 7]
+    # ]
+
+    initial_state = [
+            [2, 5, 8], 
+            [1, 3, 0], 
+            [6, 4, 7]
+        ]
+
 
     initial_node = Node(initial_state, None, None, 0)
 
@@ -196,26 +233,12 @@ def main():
 
     goal_node, len_of_frontier, len_of_reached = breadthFirstSearch(initial_node)
 
-    if goal_node.state == None:
+    empty = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+    if np.array_equal(goal_node.state, empty):
         print("No solution found")
     else:
-        steps = 0
-        all_states = []
-        all_actions = []
-        while goal_node.parent != None:
-            steps += 1
-            all_states.append(goal_node.state)
-            all_actions.append(goal_node.action)
-            goal_node = goal_node.parent
-
-        all_states.reverse()
-        all_actions.reverse()
-        for i in range(len(all_states)):
-            print(f"Step {i+1}:")
-            print(f"Action: {all_actions[i]}")
-            print("\nNew State:")
-            printState(all_states[i])
-        print("Total Number of Steps: ", steps)
+        steps = allActions(goal_node)
+        print("Total Number of Steps: ", goal_node.path_cost)
         print("Length of Frontier: ", len_of_frontier)
         print("Length of Reached: ", len_of_reached)
 
