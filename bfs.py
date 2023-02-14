@@ -1,5 +1,6 @@
 from collections import deque
 import numpy as np
+import time
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
 
@@ -239,7 +240,9 @@ def main():
     print("Initial State:")
     printState(initial_state)
 
+    start = time.time()
     goal_node, len_of_frontier, len_of_reached = breadthFirstSearch(initial_node)
+    end = time.time()
 
     empty = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     if np.array_equal(goal_node.state, empty):
@@ -249,6 +252,7 @@ def main():
         print("Total Number of Steps: ", goal_node.path_cost)
         print("Length of Frontier: ", len_of_frontier)
         print("Length of Reached: ", len_of_reached)
+    print(f"Time: {end-start} seconds")
 
 
 if __name__ == '__main__':
