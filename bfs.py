@@ -180,7 +180,7 @@ def expand(node):
 
 def allActions(node):
     """
-    Either prints all the actions and states or returns the number of steps
+    Prints actions and states from the initial state to the goal state.
     """
     actions = []
     states = []
