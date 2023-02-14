@@ -12,7 +12,7 @@ def isGoalState(state):
     """
     Checks if the state is the goal state.
     """
-    goal_state = [ [1,2,3], [4,5,6], [7,8,0] ]
+    goal_state = [ [0,1,2], [3,4,5], [6,7,8] ]
 
     if goal_state == state: return True
     else: return False
@@ -120,6 +120,7 @@ def breadthFirstSearch(initial_state):
             if child not in reached:
                 frontier.append(child)
                 reached.append(child)
+
     return None
 
 
