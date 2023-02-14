@@ -219,12 +219,20 @@ def main():
     #     [6, 4, 7]
     # ]
 
-    initial_state = [
-            [2, 5, 8], 
-            [1, 3, 0], 
-            [6, 4, 7]
-        ]
+    # Takes 11 steps and much longer than the one above.
+    # initial_state = [
+    #     [2, 5, 8], 
+    #     [1, 3, 0], 
+    #     [6, 4, 7]
+    # ]
 
+    # Apprently complicated
+    initial_state = [
+        [8, 1, 2], 
+        [7, 0, 3], 
+        [6, 5, 4]
+    ]
+    initial_state = np.array(initial_state)
 
     initial_node = Node(initial_state, None, None, 0)
 
