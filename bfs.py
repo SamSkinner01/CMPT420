@@ -138,8 +138,12 @@ def expand(state):
     return expanded_states
 
 def main():
-    initial_state = [ [1,2,3], [0,5,6], [4,7,8]]
-    printState(initial_state, end="\n\n")
+    initial_state = [ [1, 2, 3],
+                        [4, 0, 5],
+                        [6, 7, 8]]
+
+    printState(initial_state)
+    print()
     goal = breadthFirstSearch(initial_state)
     if goal == None: print("No solution found")
     else: printState(goal)
