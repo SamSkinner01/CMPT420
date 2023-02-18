@@ -50,83 +50,77 @@ def getIndex(state):
                 return i, j
 
 
-def moveDown(state):
-    """
-    Moves a number down into the blank tile, and the blank tile moves upward.
-    """
-    row, col = getIndex(state)
-    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-    if row == 0 or row == -1 and col == -1:
-        return new_state
-    else:
-        for i in range(3):
-            for j in range(3):
-                new_state[i][j] = state[i][j]
-
-        new_state[row][col] = state[row-1][col]
-        new_state[row-1][col] = 0
-
-        return new_state
-
-
 def moveUp(state):
     """
-    Moves an a number up into the blank tile, and the blank tile moves downward.
+    Moves the blank tile up
     """
     row, col = getIndex(state)
-    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-    if row == 2 or row == -1 and col == -1:
-        return new_state
+
+    if row == 0 or row == -1 and col == -1:
+        return np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     else:
+        new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
         for i in range(3):
             for j in range(3):
                 new_state[i][j] = state[i][j]
 
-        new_state[row][col] = state[row+1][col]
-        new_state[row+1][col] = 0
-
+        new_state[row][col], new_state[row-1][col] = new_state[row-1][col], new_state[row][col]
+        new_state = np.array(new_state)
         return new_state
 
+def moveDown(state):
+    """
+    Moves the blank tile down
+    """
+    row, col = getIndex(state)
+
+    if row == 2 or row == -1 and col == -1:
+        return np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+    else:
+        new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+        for i in range(3):
+            for j in range(3):
+                new_state[i][j] = state[i][j]
+
+        new_state[row][col], new_state[row+1][col] = new_state[row+1][col], new_state[row][col]
+        new_state = np.array(new_state)
+        return new_state
 
 def moveLeft(state):
     """
-    Moves a number left into the blank tile, and the blank tile moves right.
+    Moves the blank tile left
     """
     row, col = getIndex(state)
-    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-    if col == 2 or row == -1 and col == -1:
-        return new_state
+
+    if col == 0 or row == -1 and col == -1:
+        return np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     else:
-        
+        new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
         for i in range(3):
             for j in range(3):
                 new_state[i][j] = state[i][j]
 
-        new_state[row][col] = state[row][col+1]
-        new_state[row][col+1] = 0
-
+        new_state[row][col], new_state[row][col-1] = new_state[row][col-1], new_state[row][col]
+        new_state = np.array(new_state)
         return new_state
-
 
 def moveRight(state):
     """
-    Moves a number right into the blank tile, and the blank tile moves left.
+    Moves the blank tile right
     """
     row, col = getIndex(state)
 
-    new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-    if col == 0 or row == -1 and col == -1:
-        return new_state
+    if col == 2 or row == -1 and col == -1:
+        return np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
     else:
+        new_state = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
         for i in range(3):
             for j in range(3):
                 new_state[i][j] = state[i][j]
 
-        new_state[row][col] = state[row][col-1]
-        new_state[row][col-1] = 0
-
+        new_state[row][col], new_state[row][col+1] = new_state[row][col+1], new_state[row][col]
+        new_state = np.array(new_state)
         return new_state
-
 
 def breadthFirstSearch(initial_node):
     """
@@ -145,18 +139,29 @@ def breadthFirstSearch(initial_node):
     reached = np.array([initial_node])
     while frontier:
         node = frontier.popleft()
-        for child in expand(node):
-            state = child.state
+        child = expand(node)
+        for i in range(len(child)):
+            state = child[i].state
+           
+           
             state = np.array(state)
             if np.array_equal(state, empty):
                 continue
             if isGoalState(state):
-                return child, len(frontier), len(reached)
-            if state not in reached:
-                frontier.append(child)
-                reached = np.append(reached, child)
+                return child[i], len(frontier), len(reached)
+            
+            # Check if the current state node has already been reached
+            flag = False
+            for j in range(len(reached)):
+                if np.array_equal(state, reached[j].state):
+                    flag = True
+                    break
 
-    return empty, len(frontier), len(reached)
+            if not flag:
+                frontier.append(child[i])
+                reached = np.append(reached, child[i])
+
+    return None, len(frontier), len(reached)
 
 
 def expand(node):
@@ -206,8 +211,6 @@ def menu():
     print("1. The blank tile is represented by a 0.\n")
     print("2. The goal state is:")
     printState(GOAL_STATE)
-    print("3. The actions are: Up, Down, Left, Right\n")
-    print("4. These actions refer to a number moving into the blank tile. Not the blank tile moving in that direction.")
     print()
 
 def main():
@@ -245,10 +248,10 @@ def main():
     end = time.time()
 
     empty = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
-    if np.array_equal(goal_node.state, empty):
+    if goal_node == None:
         print("No solution found")
     else:
-        steps = allActions(goal_node)
+        allActions(goal_node)
         print("Total Number of Steps: ", goal_node.path_cost)
         print("Length of Frontier: ", len_of_frontier)
         print("Length of Reached: ", len_of_reached)
